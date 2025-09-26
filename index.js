@@ -1,6 +1,7 @@
 const express = require('express');
 const swaggerUi = require('swagger-ui-express');
 require('dotenv').config();
+const path = require('path');
 
 const swaggerDocs = require('./swagger');
 const extractRoutes = require('./routes/extract');
@@ -8,10 +9,17 @@ const extractRoutes = require('./routes/extract');
 const app = express();
 const port = process.env.PORT || 3000;
 
+// Serve static files (landing page) from public/
+app.use(express.static(path.join(__dirname, 'public')));
+
 // Swagger UI
 app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerDocs));
 
 // Routes
+// Explicit home route to load the landing page which redirects to /api-docs
+app.get('/', (req, res) => {
+  res.sendFile(path.join(__dirname, 'public', 'index.html'));
+});
 app.use('/', extractRoutes);
 
 /**
